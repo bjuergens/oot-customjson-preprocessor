@@ -33,6 +33,18 @@ OTT_FILEUPLOAD_BASE_URL=https://host:port/path \
 
 By default it reads `./input/` and writes `./output/`.
 
+### Run the latest `main` from GitHub
+
+No PyPI release needed — run the current `main` branch directly:
+
+```bash
+OTT_FILEUPLOAD_BASE_URL=https://host:port/path \
+  uvx --from git+https://github.com/bjuergens/oot-customjson-preprocessor oot-customjson-preprocessor
+```
+
+Pin to a branch, tag, or commit by appending `@<ref>`, e.g.
+`...oot-customjson-preprocessor@main`.
+
 ### Install
 
 ```bash
