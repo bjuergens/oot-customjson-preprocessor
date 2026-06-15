@@ -12,9 +12,15 @@ this includes among other things:
 
 ## Tooling
 
-Managed with `uv`. Common commands:
+Managed with `uv`. The whole tool is a single module:
+`src/ott_customjson_preprocessor/preprocessor.py`. Common commands:
 
-- todo: add uv/uvx commands
+- `uv sync` — create/refresh the dev environment
+- `uv run pytest` — run tests
+- `uv run ruff check .` — lint
+- `uv run ruff format .` — format
+- `uvx oot-customjson-preprocessor` — run the published tool
+- `uv run src/ott_customjson_preprocessor/preprocessor.py` — run from the checkout
 
 # General 
 
