@@ -1,0 +1,48 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "oot-customjson-preprocessor"
+version = "0.1.0"
+description = "Prepare local media (mkv/mp4/...) into OpenTogetherTube custom-JSON manifests, with browser-safe MP4s, thumbnails and subtitles."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { file = "LICENSE" }
+authors = [{ name = "bjuergens" }]
+keywords = ["opentogethertube", "ott", "ffmpeg", "video", "subtitles", "transcode"]
+classifiers = [
+    "Environment :: Console",
+    "Intended Audience :: End Users/Desktop",
+    "Programming Language :: Python :: 3",
+    "Topic :: Multimedia :: Video :: Conversion",
+]
+# The tool shells out to ffmpeg/ffprobe; it has no Python runtime dependencies.
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/bjuergens/oot-customjson-preprocessor"
+Repository = "https://github.com/bjuergens/oot-customjson-preprocessor"
+
+[project.scripts]
+oot-customjson-preprocessor = "ott_customjson_preprocessor.preprocessor:main"
+ott-preprocessor = "ott_customjson_preprocessor.preprocessor:main"
+
+[dependency-groups]
+dev = [
+    "pytest>=8",
+    "ruff>=0.6",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/ott_customjson_preprocessor"]
+
+[tool.ruff]
+line-length = 110
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

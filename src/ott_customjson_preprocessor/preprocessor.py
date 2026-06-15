@@ -21,12 +21,12 @@ OTT_SUB_LANG=<code> changes the wanted language.
 Naming follows the original filename verbatim: "somefile.mkv" ->
 "somefile.mkv.mp4", "somefile.mkv.json", "somefile.mkv.en.ass", ...
 
-Run:  uv run script.py
+Run:  uvx oot-customjson-preprocessor   (or, if installed: ott-preprocessor)
 Config via env vars (OTT_FILEUPLOAD_BASE_URL is required, the rest optional):
   OTT_FILEUPLOAD_BASE_URL   REQUIRED, no default. Base URL the produced files
                    will be served from (e.g. https://host:port/path).
-  OTT_INPUT_DIR    default: <script dir>/input
-  OTT_OUTPUT_DIR   default: <script dir>/output
+  OTT_INPUT_DIR    default: <current dir>/input
+  OTT_OUTPUT_DIR   default: <current dir>/output
   OTT_CRF          x264 quality, lower=better (default: 20)
   OTT_PRESET       x264 preset (default: medium)
   OTT_KEYINT       seconds between forced keyframes when reencoding (default: 2)
@@ -52,6 +52,7 @@ Config via env vars (OTT_FILEUPLOAD_BASE_URL is required, the rest optional):
                      which subtitle outputs to emit per selected track.
 """
 from __future__ import annotations
+
 import json
 import math
 import os
@@ -63,10 +64,12 @@ from pathlib import Path
 from typing import NoReturn
 from urllib.parse import quote
 
-SCRIPT_DIR = Path(__file__).resolve().parent
+# Defaults are resolved against the current working directory: when installed as
+# a tool (uvx/pip) the package install location is meaningless to the user.
+WORK_DIR = Path.cwd()
 FILEUPLOAD_BASE_URL = os.environ.get("OTT_FILEUPLOAD_BASE_URL", "").strip().rstrip("/")
-INPUT_DIR = Path(os.environ.get("OTT_INPUT_DIR", SCRIPT_DIR / "input"))
-OUTPUT_DIR = Path(os.environ.get("OTT_OUTPUT_DIR", SCRIPT_DIR / "output"))
+INPUT_DIR = Path(os.environ.get("OTT_INPUT_DIR", WORK_DIR / "input"))
+OUTPUT_DIR = Path(os.environ.get("OTT_OUTPUT_DIR", WORK_DIR / "output"))
 CRF = os.environ.get("OTT_CRF", "20")
 PRESET = os.environ.get("OTT_PRESET", "medium")
 KEYINT = os.environ.get("OTT_KEYINT", "2")
@@ -285,7 +288,7 @@ def max_keyframe_gap(ffprobe: str, src: Path, vindex: int, sample_seconds: int =
     if len(times) < 2:
         return float(sample_seconds)  # >= one full window with no second keyframe
     times.sort()
-    return max(b - a for a, b in zip(times, times[1:]))
+    return max(b - a for a, b in zip(times, times[1:], strict=False))
 
 
 def build_av_cmd(ffmpeg: str, src: Path, out_mp4: Path, vindex: int,
@@ -513,7 +516,7 @@ def process_file(ffmpeg: str, ffprobe: str, src: Path) -> bool:
         disp_names = build_display_names(selected)
         seen_codes: dict[str, int] = {}
         first = True
-        for s, disp in zip(selected, disp_names):
+        for s, disp in zip(selected, disp_names, strict=True):
             codec = s.get("codec_name", "")
             abs_index = int(s["index"])
             code = tag(s, "language") or "und"
@@ -578,7 +581,8 @@ def main() -> None:
     print(f"base     : {FILEUPLOAD_BASE_URL}")
     print(f"input    : {INPUT_DIR}")
     print(f"output   : {OUTPUT_DIR}")
-    print(f"reencode : {REENCODE_MODE}" + (f" (max keyframe gap {KEYINT_MAX}s)" if REENCODE_MODE == "auto" else ""))
+    gap_note = f" (max keyframe gap {KEYINT_MAX}s)" if REENCODE_MODE == "auto" else ""
+    print(f"reencode : {REENCODE_MODE}{gap_note}")
     print(f"subs     : {SUB_FORMAT} (lang={SUB_LANG}, all={'yes' if INCLUDE_ALL_SUBS else 'no'})")
     print(f"files    : {len(candidates)}")
 
