@@ -17,6 +17,14 @@ For every media file in the input directory it produces, in the output directory
 Naming follows the original filename verbatim: `somefile.mkv` →
 `somefile.mkv.mp4`, `somefile.mkv.json`, `somefile.mkv.en.ass`, ...
 
+> **Note on `.ass` subtitles.** This tool fully supports styled ASS/SSA
+> subtitles, but styled-subtitle playback is still an **experimental** feature
+> in OpenTogetherTube and is **not supported by OTT `main`** as of 2026-06-15.
+> Until OTT ships it, the `.vtt` fallback is the one that plays — emitting both
+> (`OTT_SUB_FORMAT=both`, the default) is intentional so the `.ass` files are
+> ready the moment OTT enables the feature. If your OTT build chokes on the
+> styled tracks, set `OTT_SUB_FORMAT=vtt` to emit WebVTT only.
+
 ## Requirements
 
 - Python 3.10+
